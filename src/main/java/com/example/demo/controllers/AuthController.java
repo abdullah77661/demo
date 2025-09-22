@@ -1,7 +1,7 @@
 package com.example.demo.controllers;
 
-import com.example.demo.dtos.LoginRequest;
-import com.example.demo.dtos.RegisterRequest;
+import com.example.demo.DTOs.LoginRequest;
+import com.example.demo.DTOs.RegisterRequest;
 import com.example.demo.entities.User;
 import com.example.demo.services.TokenBlacklist;
 import com.example.demo.services.UserService;

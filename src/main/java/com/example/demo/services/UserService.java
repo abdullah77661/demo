@@ -1,7 +1,7 @@
 package com.example.demo.services;
 
-import com.example.demo.dtos.LoginRequest;
-import com.example.demo.dtos.RegisterRequest;
+import com.example.demo.DTOs.LoginRequest;
+import com.example.demo.DTOs.RegisterRequest;
 import com.example.demo.entities.User;
 import com.example.demo.repositories.UserRepository;
 import com.example.demo.security.JwtUtil;

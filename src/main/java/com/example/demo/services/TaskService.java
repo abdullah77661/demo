@@ -1,7 +1,7 @@
 package com.example.demo.services;
 
-import com.example.demo.dtos.TaskRequest;
-import com.example.demo.dtos.TaskResponse;
+import com.example.demo.DTOs.TaskRequest;
+import com.example.demo.DTOs.TaskResponse;
 import com.example.demo.entities.Task;
 import com.example.demo.entities.User;
 import com.example.demo.repositories.TaskRepository;
