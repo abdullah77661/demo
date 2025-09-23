@@ -6,6 +6,8 @@ import com.example.demo.entities.User;
 import com.example.demo.repositories.UserRepository;
 import com.example.demo.security.JwtUtil;
 import com.example.demo.services.TaskService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +33,7 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<TaskResponse> createTask(@RequestBody TaskRequest request,
+    public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody TaskRequest request,
             @RequestHeader("Authorization") String token) {
         User user = getUserFromToken(token);
         return ResponseEntity.ok(taskService.createTask(request, user));
@@ -45,7 +47,7 @@ public class TaskController {
 
     @PutMapping("/{id}")
     public ResponseEntity<TaskResponse> updateTask(@PathVariable Long id,
-            @RequestParam String status,
+            @RequestParam @Pattern(regexp = "PENDING|IN_PROGRESS|COMPLETED", message = "Status must be PENDING, IN_PROGRESS, or COMPLETED") String status,
             @RequestHeader("Authorization") String token) {
         User user = getUserFromToken(token);
         return ResponseEntity.ok(taskService.updateTask(id, status, user));

@@ -1,11 +1,19 @@
 package com.example.demo.DTOs;
 
+import jakarta.validation.constraints.NotEmpty; // ← CHANGE IMPORT
+import jakarta.validation.constraints.Pattern;
+
 public class TaskRequest {
+
+    @NotEmpty(message = "Title is required") // ← USE @NotEmpty
     private String title;
+
     private String description;
+
+    @NotEmpty(message = "Status is required") // ← USE @NotEmpty
+    @Pattern(regexp = "PENDING|IN_PROGRESS|COMPLETED", message = "Status must be PENDING, IN_PROGRESS, or COMPLETED")
     private String status;
 
-    // No-args constructor
     public TaskRequest() {
     }
 

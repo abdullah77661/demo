@@ -1,5 +1,8 @@
 package com.example.demo.exceptions;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -20,7 +23,29 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors()
                 .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-        return ResponseEntity.badRequest().body(errors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
+
+    // JWT Exceptions
+    @ExceptionHandler(SignatureException.class)
+    public ResponseEntity<Map<String, String>> handleSignatureException(SignatureException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "Invalid token signature");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
+    @ExceptionHandler(MalformedJwtException.class)
+    public ResponseEntity<Map<String, String>> handleMalformedJwtException(MalformedJwtException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "Invalid token format");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<Map<String, String>> handleExpiredJwtException(ExpiredJwtException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "Token has expired");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
     // Custom runtime exceptions
@@ -35,7 +60,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, String>> handleAccessDenied(AccessDeniedException ex) {
         Map<String, String> error = new HashMap<>();
-        error.put("error", "Access Denied: " + ex.toString()); // show full exception type
+        error.put("error", "Access Denied");
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
@@ -43,7 +68,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Map<String, String>> handleAuthenticationException(AuthenticationException ex) {
         Map<String, String> error = new HashMap<>();
-        error.put("error", "Unauthorized: " + ex.toString()); // show full exception type
+        error.put("error", "Unauthorized");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 
@@ -51,7 +76,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleException(Exception ex) {
         Map<String, String> error = new HashMap<>();
-        error.put("error", "Something went wrong: " + ex.toString()); // include full exception type
+        error.put("error", "Internal server error");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 }

@@ -5,7 +5,6 @@ import com.example.demo.DTOs.TaskResponse;
 import com.example.demo.entities.Task;
 import com.example.demo.entities.User;
 import com.example.demo.repositories.TaskRepository;
-import com.example.demo.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,14 +14,15 @@ import java.util.stream.Collectors;
 public class TaskService {
 
     private final TaskRepository taskRepository;
-    private final UserRepository userRepository;
 
-    public TaskService(TaskRepository taskRepository, UserRepository userRepository) {
+    public TaskService(TaskRepository taskRepository) {
         this.taskRepository = taskRepository;
-        this.userRepository = userRepository;
     }
 
     public TaskResponse createTask(TaskRequest request, User user) {
+        // Validate task title uniqueness for this user (optional)
+        validateTaskTitleUniqueness(request.getTitle(), user);
+
         Task task = new Task();
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
@@ -44,9 +44,13 @@ public class TaskService {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
 
+        // Validate task ownership
         if (!task.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Forbidden");
+            throw new RuntimeException("Access denied: You can only update your own tasks");
         }
+
+        // Validate status transition (optional business rule)
+        validateStatusTransition(task.getStatus(), status);
 
         task.setStatus(status);
         Task updatedTask = taskRepository.save(task);
@@ -57,8 +61,9 @@ public class TaskService {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
 
+        // Validate task ownership
         if (!task.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Forbidden");
+            throw new RuntimeException("Access denied: You can only delete your own tasks");
         }
 
         taskRepository.delete(task);
@@ -71,5 +76,23 @@ public class TaskService {
                 task.getDescription(),
                 task.getStatus(),
                 task.getUser().getId());
+    }
+
+    // Additional validation methods
+    private void validateTaskTitleUniqueness(String title, User user) {
+        List<Task> userTasks = taskRepository.findByUser(user);
+        boolean titleExists = userTasks.stream()
+                .anyMatch(task -> task.getTitle().equalsIgnoreCase(title));
+
+        if (titleExists) {
+            throw new RuntimeException("Task with this title already exists");
+        }
+    }
+
+    private void validateStatusTransition(String currentStatus, String newStatus) {
+        // Example: Prevent moving from COMPLETED back to PENDING
+        if ("COMPLETED".equals(currentStatus) && "PENDING".equals(newStatus)) {
+            throw new RuntimeException("Cannot change status from COMPLETED to PENDING");
+        }
     }
 }
